@@ -3,6 +3,6 @@ module AndGate(Branch, Zero, AndGateOut);
     input Zero;
     output reg AndGateOut;
     always @(Branch,Zero) begin
-        AndGateOut <= Branch && Zero;
+        AndGateOut = Branch && Zero;
     end
 endmodule

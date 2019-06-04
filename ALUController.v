@@ -5,16 +5,16 @@ module ALUControl( ALUCtl, ALUOp, Func);
  
     always @(ALUOp, Func) begin  
         if(ALUOp == 0)
-           ALUCtl <= 0;    //LW and SW use add
+           ALUCtl = 0;    //LW and SW use add
         else if(ALUOp == 1)
-           ALUCtl <= 3;   // branch use subtract
+           ALUCtl = 3;   // branch use subtract
         else
             case(Func)
-                32: ALUCtl <= 0; //add
-                36: ALUCtl <= 1; //and
-                37: ALUCtl <= 2; //or
-                34: ALUCtl <= 3; //sub
-                default: ALUCtl <=0;
+                6'b100000: ALUCtl = 0; //add
+                6'b100100: ALUCtl = 1; //and
+                6'b100101: ALUCtl = 2; //or
+                6'b100010: ALUCtl = 3; //sub
+                default: ALUCtl =0;
             endcase
     end 
 endmodule
