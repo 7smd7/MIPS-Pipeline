@@ -7,7 +7,7 @@ module ID2EXE (clk, rst, signExIn,  readData1In,  readData2In,  PC_In,  EXE_In, 
   input [31:0] signExIn, PC_In, readData1In, readData2In;
   output reg M_Out;
   output reg [1:0] WB_Out;
-  output reg [2:0] EXE_Out;
+  output reg [3:0] EXE_Out;
   output reg [4:0] dest1Out, dest1Out;
   output reg [31:0] signExOut, PC_Out, readData1Out, readData2Out;
 
