@@ -112,6 +112,51 @@ module MipsCPU(clock, reset);
         //add result
     );
 
+
+     EXE2MEM exe2mem (
+         //inputs
+         .clk(clock),
+         .rst(reset), 
+         .zeroIn(),  
+         .WB_In(),  
+         .M_In(),  
+         .PC_In(),  
+         .ALUResIn(),  
+         .readDate2In(),  
+         .destIn(),   //????
+                       // mux???
+         .//outputs
+         .zeroOut(), 
+         .WB_Out(), 
+         .M_Out(), 
+         .PC_Out(), 
+         .ALUResOut(), 
+         .readDate2Out(),  // read data mem???
+         .destOut()
+                        //   mem address
+                        //mux
+         );
+
+
+        MEM2WB mem2wb (
+            //inputs
+            .clk(clock), 
+            .rst(reset), 
+            .WB_IN(), 
+            .ALUResIn(), 
+            .memReadIn(), 
+            .destIn(),     
+                                  //read data
+                                  //data mem address
+                                  //mux
+            //outputs
+            .WB_Out(),
+            .ALUResOut(),
+            .memReadOut(),   
+            .destOut()
+            );
+
+
     //Mux InstMem - RegisterFile 
     mux_2_1 mux0(
             //input
