@@ -11,10 +11,10 @@ module MipsCPU(clock, reset);
     mux_2_1 mux0(
             //input
             .in0(Add_PCOut),     //inst[20;16]
-           //???????????? .in1(inst[15:11]),
+                        //???????????? .in1(inst[15:11]),
             .sel(RegDst),
             //output
-            .out(PCin)    //write reg
+            .out(PCin)    //write reg??
             );
 
     PC pc_0(
@@ -37,7 +37,7 @@ module MipsCPU(clock, reset);
        //inputs
        .clk(clock), 
        .rst(reset), 
-       .PCIn(PCin), 
+       .PCIn(PCin),  //Add_PCOut ???
        .instructionIn(inst),
        //outputs 
        .PC(idpc),
@@ -61,9 +61,9 @@ module MipsCPU(clock, reset);
         //inputs
         .rd_reg1(idinst[25:21]), 
         .rd_reg2(idinst[20:16]),
-        .RegWrite(RegWrite), //?????
-        .wr_reg(WriteReg), //????
-        .wr_data(WriteData_Reg), 
+        .RegWrite(RegWrite),   // wb_out ????
+        .wr_reg(WriteReg), // mux0 ????
+        .wr_data(WriteData_Reg),  // mux3???
         //outputs
         .rd_data1(ReadData1),
         .rd_data2(ReadData2)
@@ -90,7 +90,7 @@ module MipsCPU(clock, reset);
         .signExIn(Extend32),
         .readData1In(readData1Out),  
         .readData2In(readData2Out),  
-        .PC_In(idpc),     // add pc??
+        .PC_In(idpc),     // Add_PCOut??
         .EXE_In(), //????  
         .M_In(), //????  
         .WB_In(),  //????  
@@ -99,17 +99,17 @@ module MipsCPU(clock, reset);
         //outputs
         .signExOut(),  //nadarim
         .readData1Out(),  //nadarim
-        .readData2Out(),   //nadarim
+        .readData2Out(readData2Out), //changed//true?  
         .PC_Out(),    //nadarim
         .EXE_Out(), // nadarim
         .M_Out(), 
         .WB_Out(), 
-        .dest1Out(), 
-        .dest2Out()
-        //mux
-        //alu result
-        //zero
-        //add result
+        .dest1Out(),  //??
+        .dest2Out()    //??
+        // mux0 ??
+        //alu0 || aluout ??
+        //zero ??
+        //Add_ALUOut ??
     );
 
 
@@ -117,24 +117,25 @@ module MipsCPU(clock, reset);
          //inputs
          .clk(clock),
          .rst(reset), 
-         .zeroIn(),  
-         .WB_In(),  
-         .M_In(),  
-         .PC_In(),  
-         .ALUResIn(),  
-         .readDate2In(),  
+         .zeroIn(),  //??
+         .WB_In(),  //??
+         .M_In(),   //??
+         .PC_In(),  //??
+         .ALUResIn(),  // Add_ALUOut??
+         .readDate2In(readData2Out),  //changed//true?
          .destIn(),   //????
-                       // mux???
+                       // mux0???
+                       //aluout???
          .//outputs
          .zeroOut(), 
          .WB_Out(), 
-         .M_Out(), 
-         .PC_Out(), 
+         .M_Out(),  //??
+         .PC_Out(), //??
          .ALUResOut(), 
-         .readDate2Out(),  // read data mem???
+         .readDate2Out(readData),  //changed//true?
          .destOut()
-                        //   mem address
-                        //mux
+                        //   aluout??
+                        //   mux0 ??
          );
 
 
@@ -146,14 +147,15 @@ module MipsCPU(clock, reset);
             .ALUResIn(), 
             .memReadIn(), 
             .destIn(),     
-                                  //read data
-                                  //data mem address
+                                  //readData
+                                  //aluout
                                   //mux
             //outputs
             .WB_Out(),
             .ALUResOut(),
             .memReadOut(),   
-            .destOut()
+            .destOut()  
+                                   //mux ??
             );
 
 
@@ -200,7 +202,7 @@ module MipsCPU(clock, reset);
     ALU alu_0(
         //inputs
         .r1(ReadData1),
-        .r2(ALU_B),    //mux????
+        .r2(ALU_B),    //mux2to1 2_0????
         .OP(ALUCtl),
         //outputs
         .result(ALUOut),
@@ -213,7 +215,7 @@ module MipsCPU(clock, reset);
         .ip1(Add_PCOut),
         .ip2(ShiftOut),
         //outputs
-        .out(Add_ALUOut)    //mux_2_1
+        .out(Add_ALUOut)    
     );
 
     //wire [31:0] Add_PCOut;
