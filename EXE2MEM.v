@@ -5,7 +5,7 @@ module EXE2MEM (clk, rst, zeroIn,  WB_In,  M_In,  PC_In,  ALUResIn,  readDate2In
     input [2:0] M_In;
     input [4:0] destIn;
     input [31:0] ALUResIn, readDate2In, PC_In;
-    output reg M_Out, zeroOut;
+    output reg zeroOut;
     output reg [1:0] WB_Out;
     output reg [2:0] M_Out;
     output reg [4:0] destOut;
