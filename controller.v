@@ -12,30 +12,23 @@ begin
         0: begin //R-type  
             wb=2 
             m=0;   
-            exe=1100
+            exe=12
             end 
-
-
         35: begin //LW 
             wb=3; 
             m=2;
             exe=1; 
             end 
-
-
         43: begin //SW
             wb=0;  
             m=1; 
             exe=1;  
             end
-
-
             begin //BEq
             wb=0;              
             m=4;  
             exe=2;  
             end 
-
     endcase   
 end  
 endmodule  
