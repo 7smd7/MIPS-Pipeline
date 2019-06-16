@@ -8,15 +8,6 @@ module MipsCPU(clock, reset);
     wire [31:0] Add_PCOut;
     wire [31:0] PCin, PCout;
 
-    mux_2_1 mux0(
-            //input
-            .in0(Add_PCOut),     //inst[20;16]
-                        //???????????? .in1(inst[15:11]),
-            .sel(RegDst),
-            //output
-            .out(PCin)    //write reg??
-            );
-
     PC pc_0(
         //inputs
         .clk(clock), .rst(reset), .PCin(PCin),
@@ -37,33 +28,31 @@ module MipsCPU(clock, reset);
        //inputs
        .clk(clock), 
        .rst(reset), 
-       .PCIn(PCin),  //Add_PCOut ???
+       .PCIn(Add_PCOut),
        .instructionIn(inst),
        //outputs 
        .PC(idpc),
        .instruction(idinst)
     );
 
-    // wire RegDst, RegWrite, ALUSrc, MemtoReg, MemRead, MemWrite, Branch; 
-    // wire [1:0] ALUOp;
-    // control main_control_0(
-    //     //inputs
-    //     .opcode(idinst[31:26]),
-    //     //outputs
-    //     .reg_dst(RegDst), .reg_write(RegWrite),
-    //     .alu_src(ALUSrc), .branch(Branch), .alu_op(ALUOp),
-    //     .mem_to_reg(MemtoReg), .mem_read(MemRead), .mem_write(MemWrite)
-    // );
-
+    wire reg [1:0] wb;
+    wire reg [2:0] m;
+    wire reg [3:0] exe;    
+    control main_control_0(
+        //inputs
+        .opcode(idinst[31:26]),
+        //outputs
+        .wb(wb), .m(m), .exe(exe)
+    );
     
     wire [31:0] ReadData1, ReadData2; 
     ReqFile regfile_0(
         //inputs
         .rd_reg1(idinst[25:21]), 
         .rd_reg2(idinst[20:16]),
-        .RegWrite(RegWrite),   // wb_out ????
-        .wr_reg(WriteReg), // mux0 ????
-        .wr_data(WriteData_Reg),  // mux3???
+        .RegWrite(wbWB[0]),
+        .wr_reg(wbWriteReg),
+        .wr_data(WriteData_Reg),
         //outputs
         .rd_data1(ReadData1),
         .rd_data2(ReadData2)
@@ -76,95 +65,87 @@ module MipsCPU(clock, reset);
         //outputs
         .op(Extend32)
     );
-    
 
-   wire exM_Out;
-   wire [1:0] exWB_Out;
-   wire [2:0] EXE_Out;
-   wire [4:0] exdest1Out, exdest1Out;
-   wire [31:0] exsignExOut, exPC_Out, exreadData1Out, exreadData2Out;   
+    wire [1:0] exWB;
+    wire [2:0] exM;
+    wire [3:0] exEXE;
+    wire [4:0] exdest1, exdest2;
+    wire [31:0] exsignEx, exPC, exreadData1, exreadData2;   
     ID2EXE id2exe (
         //inputs
         .clk(clock), 
         .rst(reset), 
         .signExIn(Extend32),
-        .readData1In(readData1Out),  
-        .readData2In(readData2Out),  
-        .PC_In(idpc),     // Add_PCOut??
-        .EXE_In(), //????  
-        .M_In(), //????  
-        .WB_In(),  //????  
+        .readData1In(ReadData1),  
+        .readData2In(ReadData2),  
+        .PC_In(idpc),
+        .EXE_In(exe),
+        .M_In(m), 
+        .WB_In(wb),
         .dest1In(idinst[20:16]),  
         .dest2In(idinst[15:11]),
         //outputs
-        .signExOut(),  //nadarim
-        .readData1Out(),  //nadarim
-        .readData2Out(readData2Out), //changed//true?  
-        .PC_Out(),    //nadarim
-        .EXE_Out(), // nadarim
-        .M_Out(), 
-        .WB_Out(), 
-        .dest1Out(),  //??
-        .dest2Out()    //??
-        // mux0 ??
-        //alu0 || aluout ??
-        //zero ??
-        //Add_ALUOut ??
+        .signExOut(exsignEx),
+        .readData1Out(exreadData1),
+        .readData2Out(exreadData2),
+        .PC_Out(exPC),
+        .EXE_Out(exEXE),
+        .M_Out(exM), 
+        .WB_Out(exWB), 
+        .dest1Out(exdest1),
+        .dest2Out(exdest2)
     );
 
-
-     EXE2MEM exe2mem (
-         //inputs
-         .clk(clock),
-         .rst(reset), 
-         .zeroIn(),  //??
-         .WB_In(),  //??
-         .M_In(),   //??
-         .PC_In(),  //??
-         .ALUResIn(),  // Add_ALUOut??
-         .readDate2In(readData2Out),  //changed//true?
-         .destIn(),   //????
-                       // mux0???
-                       //aluout???
-         .//outputs
-         .zeroOut(), 
-         .WB_Out(), 
-         .M_Out(),  //??
-         .PC_Out(), //??
-         .ALUResOut(), 
-         .readDate2Out(readData),  //changed//true?
-         .destOut()
-                        //   aluout??
-                        //   mux0 ??
-         );
-
-
-        MEM2WB mem2wb (
-            //inputs
-            .clk(clock), 
-            .rst(reset), 
-            .WB_IN(), 
-            .ALUResIn(), 
-            .memReadIn(), 
-            .destIn(),     
-                                  //readData
-                                  //aluout
-                                  //mux
-            //outputs
-            .WB_Out(),
-            .ALUResOut(),
-            .memReadOut(),   
-            .destOut()  
-                                   //mux ??
-            );
+    wire memZero;
+    wire [1:0] memWB;
+    wire [2:0] memM;
+    wire [4:0]  memWriteReg;
+    wire [31:0] memAdd_ALU, memPC, memreadData2;
+    EXE2MEM exe2mem (
+        //inputs
+        .clk(clock),
+        .rst(reset), 
+        .zeroIn(Zero),
+        .WB_In(exWB),
+        .M_In(exM),
+        .PC_In(Add_ALUOut),
+        .ALUResIn(ALUOut),
+        .readDate2In(exreadData2),
+        .destIn(WriteReg),
+        //outputs
+        .zeroOut(memZero), 
+        .WB_Out(memWB), 
+        .M_Out(memM),
+        .PC_Out(memPC),
+        .ALUResOut(memAdd_ALU), 
+        .readDate2Out(memreadData2),
+        .destOut(memWriteReg)
+        );
+    
+    wire [4:0]  wbWriteReg;
+    wire [31:0] wbAdd_ALU, wbReadData;
+    MEM2WB mem2wb (
+        //inputs
+        .clk(clock), 
+        .rst(reset), 
+        .WB_IN(memWB), 
+        .ALUResIn(memAdd_ALU), 
+        .memReadIn(ReadData), 
+        .destIn(memWriteReg),
+        //outputs
+        .WB_Out(wbWB),
+        .ALUResOut(wbAdd_ALU),
+        .memReadOut(wbReadData),   
+        .destOut(wbWriteReg)  
+        );
 
 
     //Mux InstMem - RegisterFile 
     mux_2_1 mux0(
             //input
-            .in0(idinst[20:16]),
-            .in1(idinst[15:11]),
-            .sel(RegDst),
+            .in0(exdest1),
+            .in1(exdest2),
+            .sel(exEXE[0]),
             //output
             .out(WriteReg)
             );
@@ -173,9 +154,9 @@ module MipsCPU(clock, reset);
     wire [31:0] ALU_B;
     mux_2_1 mux2_0(
         //inputs
-        .sel(ALUSrc),
-        .in0(ReadData2),
-        .in1(Extend32),
+        .sel(exEXE[3]),
+        .in0(exreadData2),
+        .in1(exsignEx),
         //outputs
         .out(ALU_B)
     );   
@@ -183,7 +164,7 @@ module MipsCPU(clock, reset);
     wire [31:0] ShiftOut;
     lshift shift_left2_0(
         //inputs
-        .ip(Extend32),
+        .ip(exsignEx),
         //outputs
         .op(ShiftOut)
     ); 
@@ -191,8 +172,8 @@ module MipsCPU(clock, reset);
     wire [1:0] ALUCtl;
     ALUControl alu_control_0(
         //inputs
-        .ALUOp(ALUOp),    //exe????
-        .Func(idinst[5:0]),
+        .ALUOp(exEXE[2:1]),
+        .Func(exsignEx[5:0]),
         //outputs
         .ALUCtl(ALUCtl)
     );
@@ -201,8 +182,8 @@ module MipsCPU(clock, reset);
     wire [31:0] ALUOut;
     ALU alu_0(
         //inputs
-        .r1(ReadData1),
-        .r2(ALU_B),    //mux2to1 2_0????
+        .r1(exreadData1),
+        .r2(ALU_B),
         .OP(ALUCtl),
         //outputs
         .result(ALUOut),
@@ -212,35 +193,34 @@ module MipsCPU(clock, reset);
     wire [31:0] Add_ALUOut;
     adder add_alu_0(
         //inputs
-        .ip1(Add_PCOut),
+        .ip1(exPC),
         .ip2(ShiftOut),
         //outputs
         .out(Add_ALUOut)    
     );
 
-    //wire [31:0] Add_PCOut;
     adder add_alu(
         //inputs
         .ip1(PCout),
-        .ip2(1),     // +4??
+        .ip2(1),
         //outputs
         .out(Add_PCOut)
     );
 
-    wire AndGateOut;
+    wire PCSrc;
     AndGate and_gate_0(
         //inputs
-        .Branch(Branch),
+        .Branch(memM[0]),
         .Zero(Zero),
         //outputs
-        .AndGateOut(AndGateOut) //pc-src ????
+        .AndGateOut(PCSrc)
     ); 
 
     mux_2_1 mux4_0(
         //inputs
         .in0(Add_PCOut),
-        .in1(Add_ALUOut),
-        .sel(AndGateOut),
+        .in1(memPC),
+        .sel(PCSrc),
         //outputs
         .out(PCin)
     ); 
@@ -248,19 +228,19 @@ module MipsCPU(clock, reset);
     wire [31:0] ReadData;
     data_memory  data_memory_0(
         //inputs
-        .addr(ALUOut),
-        .mem_write(MemWrite),
-        .mem_read(MemRead),
-        .write_data(ReadData2),
+        .addr(memAdd_ALU),
+        .mem_write(memM[2]),
+        .mem_read(memM[1]),
+        .write_data(memreadData2),
         //outputs
         .read_data(ReadData)
     ); 
 
     mux_2_1 mu3_0(
         //inputs
-        .in0(ReadData),
-        .in1(ALUOut),
-        .sel(MemtoReg),
+        .in0(wbReadData),
+        .in1(wbAdd_ALU),
+        .sel(wbWB[1]),
         //outputs
         .out(WriteData_Reg)
     );

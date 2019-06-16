@@ -2,15 +2,13 @@ module ID2EXE (clk, rst, signExIn,  readData1In,  readData2In,  PC_In,  EXE_In, 
                          signExOut, readData1Out, readData2Out, PC_Out, EXE_Out, M_Out, WB_Out, dest1Out, dest2Out);
   input clk, rst;
   input [1:0] WB_In;
-  input [2:0] EXE_In, M_In;
+  input [2:0] M_In;
+  input [3:0] EXE_In;
   input [4:0] dest1In, dest2In;
   input [31:0] signExIn, PC_In, readData1In, readData2In;
   output reg [1:0] WB_Out;
-<<<<<<< HEAD
+  output reg [2:0] M_Out;
   output reg [3:0] EXE_Out;
-=======
-  output reg [2:0] EXE_Out, M_Out;
->>>>>>> e3ac58e8ed19acb73e62b48ac21102459dbbf503
   output reg [4:0] dest1Out, dest1Out;
   output reg [31:0] signExOut, PC_Out, readData1Out, readData2Out;
 
