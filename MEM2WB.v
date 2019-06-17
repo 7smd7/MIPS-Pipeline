@@ -17,7 +17,7 @@ module MEM2WB (clk, rst, WB_IN, ALUResIn, memReadIn, destIn,
         else begin
             WB_Out <= WB_IN;
             destOut <= destIn;
-            ALUResIn <= ALUResOut;
+            ALUResOut <= ALUResIn;
             memReadOut <= memReadIn;
         end
     end

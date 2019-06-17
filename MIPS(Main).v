@@ -3,10 +3,15 @@ module MipsCPU(clock, reset);
     input clock;
     input reset; 
 
+    wire Zero;
+    wire [4:0]  wbWriteReg;
     wire [31:0] WriteData_Reg;
     wire [4:0]  WriteReg;
     wire [31:0] Add_PCOut;
     wire [31:0] PCin, PCout;
+    wire [31:0] Add_ALUOut;
+    wire [31:0] ALUOut;
+    wire [31:0] ReadData;
 
     PC pc_0(
         //inputs
@@ -45,6 +50,7 @@ module MipsCPU(clock, reset);
         .wb(wb), .m(m), .exe(exe)
     );
     
+    wire [1:0] wbWB;
     wire [31:0] ReadData1, ReadData2; 
     ReqFile regfile_0(
         //inputs
@@ -122,7 +128,6 @@ module MipsCPU(clock, reset);
         .destOut(memWriteReg)
         );
     
-    wire [4:0]  wbWriteReg;
     wire [31:0] wbAdd_ALU, wbReadData;
     MEM2WB mem2wb (
         //inputs
@@ -178,8 +183,6 @@ module MipsCPU(clock, reset);
         .ALUCtl(ALUCtl)
     );
 
-    wire Zero;
-    wire [31:0] ALUOut;
     ALU alu_0(
         //inputs
         .r1(exreadData1),
@@ -190,7 +193,7 @@ module MipsCPU(clock, reset);
         .zero(Zero)
     ); 
 
-    wire [31:0] Add_ALUOut;
+    
     adder add_alu_0(
         //inputs
         .ip1(exPC),
@@ -225,7 +228,6 @@ module MipsCPU(clock, reset);
         .out(PCin)
     ); 
 
-    wire [31:0] ReadData;
     data_memory  data_memory_0(
         //inputs
         .addr(memAdd_ALU),

@@ -10,9 +10,9 @@ always @(opcode)
 begin   
     case(opcode)   
         0: begin //R-type  
-            wb=2 
+            wb=2;
             m=0;   
-            exe=12
+            exe=12;
             end 
         35: begin //LW 
             wb=3; 
@@ -23,8 +23,8 @@ begin
             wb=0;  
             m=1; 
             exe=1;  
-            end
-            begin //BEq
+            end   
+        default: begin //BEq
             wb=0;              
             m=4;  
             exe=2;  
