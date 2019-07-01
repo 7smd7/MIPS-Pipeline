@@ -4,7 +4,7 @@ module tb_mips;
     reg reset;  
     // Outputs  
 
-    MipsCPU singCycle (  
+    MipsCPU pipeline (  
         .clock(clock),   
         .reset(reset)
     );  

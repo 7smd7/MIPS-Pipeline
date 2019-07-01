@@ -2,12 +2,11 @@ module ALU (
 	input [31:0] r1,
 	input [31:0] r2,
 	input [1:0] OP,
-	output [31:0] result,
-	output zero
+	output [31:0] result
 );
 	reg [31:0] out;
 	
-  always @(r1,r2,OP) begin
+  always @(OP) begin
 		case(OP)
 			2'b00: out = r1 + r2; //ADD, LW,SW
 			2'b01: out = r1 & r2; //AND 
@@ -16,6 +15,5 @@ module ALU (
 			default: out = 0;
 		endcase
 	end
-	assign zero = (result==0);
 	assign result = out;
 endmodule

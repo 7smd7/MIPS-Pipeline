@@ -52,8 +52,9 @@ module MipsCPU(clock, reset);
     
     wire [1:0] wbWB;
     wire [31:0] ReadData1, ReadData2; 
-    ReqFile regfile_0(
+    RegFile regfile_0(
         //inputs
+        .clock(clock),
         .rd_reg1(idinst[25:21]), 
         .rd_reg2(idinst[20:16]),
         .RegWrite(wbWB[0]),
@@ -189,8 +190,7 @@ module MipsCPU(clock, reset);
         .r2(ALU_B),
         .OP(ALUCtl),
         //outputs
-        .result(ALUOut),
-        .zero(Zero)
+        .result(ALUOut)
     ); 
 
     
@@ -205,12 +205,13 @@ module MipsCPU(clock, reset);
     adder add_alu(
         //inputs
         .ip1(PCout),
-        .ip2(1),
+        .ip2(4),
         //outputs
         .out(Add_PCOut)
     );
 
-    wire PCSrc;
+    wire reg PCSrc;
+    Beq beq (.reg1(ReadData1), .reg2(ReadData2), .out(Zero));
     AndGate and_gate_0(
         //inputs
         .Branch(memM[0]),

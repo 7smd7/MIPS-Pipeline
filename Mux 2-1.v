@@ -6,7 +6,7 @@ module  mux_2_1(in0, in1, sel, out);
 
   output reg [31:0] out;
   
-  always@(in0,in1,sel) begin
+  always@(sel) begin
     out = (sel) ? in1 : in0;
   end
 endmodule
