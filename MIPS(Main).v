@@ -45,7 +45,7 @@ module MipsCPU(clock, reset);
     wire reg [3:0] exe;    
     control main_control_0(
         //inputs
-        .opcode(idinst[31:26]),
+        .inst(idinst),
         //outputs
         .wb(wb), .m(m), .exe(exe)
     );
